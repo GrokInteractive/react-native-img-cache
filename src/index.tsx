@@ -1,12 +1,12 @@
-import React, {Component} from "react";
-import {Image, ImageProperties, ImageURISource, Platform} from "react-native";
+import React, { Component } from "react";
+import { Image, ImageProperties, ImageURISource, Platform } from "react-native";
 import RNFetchBlob from "react-native-fetch-blob";
 const SHA1 = require("crypto-js/sha1");
 
 const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 const BASE_DIR = RNFetchBlob.fs.dirs.CacheDir + "/react-native-img-cache";
 const FILE_PREFIX = Platform.OS === "ios" ? "" : "file://";
-export type CacheHandler = (path: string) => void;
+export type CacheHandler = (path: string, uri: string) => void;
 
 export interface CachedImageURISource extends ImageURISource {
     uri: string;
@@ -36,7 +36,7 @@ export class ImageCache {
 
     private static instance: ImageCache;
 
-    private constructor() {}
+    private constructor() { }
 
     static get(): ImageCache {
         if (!ImageCache.instance) {
@@ -53,7 +53,7 @@ export class ImageCache {
     }
 
     on(source: CachedImageURISource, handler: CacheHandler, immutable?: boolean) {
-        const {uri} = source;
+        const { uri } = source;
         if (!this.cache[uri]) {
             this.cache[uri] = {
                 source,
@@ -95,8 +95,8 @@ export class ImageCache {
     }
 
     private download(cache: CacheEntry) {
-        const {source} = cache;
-        const {uri} = source;
+        const { source } = cache;
+        const { uri } = source;
         if (!cache.downloading) {
             const path = this.getPath(uri, cache.immutable);
             cache.downloading = true;
@@ -134,7 +134,7 @@ export class ImageCache {
     private notify(uri: string) {
         const handlers = this.cache[uri].handlers;
         handlers.forEach(handler => {
-            handler(this.cache[uri].path as string);
+            handler(this.cache[uri].path as string, uri as string);
         });
     }
 }
@@ -156,7 +156,7 @@ export abstract class BaseCachedImage<P extends CachedImageProps> extends Compon
 
     private uri: string;
 
-    private handler: CacheHandler = (path: string) => {
+    private handler: CacheHandler = (path: string, uri: string) => {
         this.setState({ path });
     }
 
@@ -183,7 +183,7 @@ export abstract class BaseCachedImage<P extends CachedImageProps> extends Compon
         const props: any = {};
         Object.keys(this.props).forEach(prop => {
             if (prop === "source" && (this.props as any).source.uri) {
-                props["source"] = this.state.path ? {uri: FILE_PREFIX + this.state.path} : {};
+                props["source"] = this.state.path ? { uri: FILE_PREFIX + this.state.path } : {};
             } else if (["mutable", "component"].indexOf(prop) === -1) {
                 props[prop] = (this.props as any)[prop];
             }
@@ -202,7 +202,7 @@ export abstract class BaseCachedImage<P extends CachedImageProps> extends Compon
     }
 
     componentWillMount() {
-        const {mutable} = this.props;
+        const { mutable } = this.props;
         const source = this.checkSource(this.props.source);
         if (source.uri) {
             this.observe(source as CachedImageURISource, mutable === true);
@@ -210,7 +210,7 @@ export abstract class BaseCachedImage<P extends CachedImageProps> extends Compon
     }
 
     componentWillReceiveProps(nextProps: P) {
-        const {mutable} = nextProps;
+        const { mutable } = nextProps;
         const source = this.checkSource(nextProps.source);
         if (source.uri) {
             this.observe(source as CachedImageURISource, mutable === true);
@@ -241,7 +241,7 @@ export class CustomCachedImage<P extends CustomCachedImageProps> extends BaseCac
     }
 
     render() {
-        const {component} = this.props;
+        const { component } = this.props;
         const props = this.getProps();
         const Component = component;
         return <Component {...props}>{this.props.children}</Component>;
