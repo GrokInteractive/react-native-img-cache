@@ -1,4 +1,3 @@
-/// <reference types="react-native" />
 /// <reference types="react" />
 import { Component } from "react";
 import { ImageProperties, ImageURISource } from "react-native";
@@ -33,7 +32,6 @@ export interface CachedImageState {
 export declare abstract class BaseCachedImage<P extends CachedImageProps> extends Component<P, CachedImageState> {
     private uri;
     private handler;
-    constructor();
     private dispose();
     private observe(source, mutable);
     protected getProps(): any;
@@ -43,10 +41,11 @@ export declare abstract class BaseCachedImage<P extends CachedImageProps> extend
     componentWillUnmount(): void;
 }
 export declare class CachedImage extends BaseCachedImage<CachedImageProps> {
-    constructor();
+    render(): JSX.Element;
+}
+export declare class CachedImageBackground extends BaseCachedImage<CachedImageProps> {
     render(): JSX.Element;
 }
 export declare class CustomCachedImage<P extends CustomCachedImageProps> extends BaseCachedImage<P> {
-    constructor();
     render(): JSX.Element;
 }

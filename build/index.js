@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, Platform } from "react-native";
+import { Image, ImageBackground, Platform } from "react-native";
 import RNFetchBlob from "react-native-fetch-blob";
 const SHA1 = require("crypto-js/sha1");
 const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -114,11 +114,10 @@ export class ImageCache {
 }
 export class BaseCachedImage extends Component {
     constructor() {
-        super();
+        super(...arguments);
         this.handler = (path, uri) => {
             this.setState({ path });
         };
-        this.state = { path: undefined };
     }
     dispose() {
         if (this.uri) {
@@ -155,14 +154,15 @@ export class BaseCachedImage extends Component {
     componentWillMount() {
         const { mutable } = this.props;
         const source = this.checkSource(this.props.source);
-        if (source.uri) {
+        this.setState({ path: undefined });
+        if (typeof (source) !== "number" && source.uri) {
             this.observe(source, mutable === true);
         }
     }
     componentWillReceiveProps(nextProps) {
         const { mutable } = nextProps;
         const source = this.checkSource(nextProps.source);
-        if (source.uri) {
+        if (typeof (source) !== "number" && source.uri) {
             this.observe(source, mutable === true);
         }
     }
@@ -171,18 +171,21 @@ export class BaseCachedImage extends Component {
     }
 }
 export class CachedImage extends BaseCachedImage {
-    constructor() {
-        super();
-    }
     render() {
         const props = this.getProps();
+        if (React.Children.count(this.props.children) > 0) {
+            console.warn("Using <CachedImage> with children is deprecated, use <CachedImageBackground> instead.");
+        }
         return React.createElement(Image, Object.assign({}, props), this.props.children);
     }
 }
-export class CustomCachedImage extends BaseCachedImage {
-    constructor() {
-        super();
+export class CachedImageBackground extends BaseCachedImage {
+    render() {
+        const props = this.getProps();
+        return React.createElement(ImageBackground, Object.assign({}, props), this.props.children);
     }
+}
+export class CustomCachedImage extends BaseCachedImage {
     render() {
         const { component } = this.props;
         const props = this.getProps();

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, ImageProperties, ImageURISource, Platform } from "react-native";
+import {Image, ImageBackground, ImageProperties, ImageURISource, Platform} from "react-native";
 import RNFetchBlob from "react-native-fetch-blob";
 const SHA1 = require("crypto-js/sha1");
 
